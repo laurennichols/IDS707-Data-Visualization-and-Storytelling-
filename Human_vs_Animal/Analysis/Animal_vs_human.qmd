@@ -1,0 +1,263 @@
+---
+title: "Human vs Animal"
+author: "Lauren Nichols"
+format: pdf
+editor: visual
+---
+
+Load all necessary libraries:
+
+```{r}
+#load libraries
+library(tidyverse) #all tidyverse libraries including ggplot
+library(ggrepel) #used to format labels on plots
+library(readr) #for reading in files
+library(here) #helps set root file 
+```
+
+Read in the data and set data types
+
+```{r}
+
+Humans_vs_animals_UKvsUS <- read_csv(here("Data/Humans_vs_animals_UKvsUS.csv"))
+#load UK vs US - aggregated data
+dat = read_csv(here("Data/Humans_vs_animals_UKvsUS.csv"))
+
+dat$Animal = as.factor(dat$Animal)
+dat$Nat = as.factor(dat$Nat)
+dat$Gender = as.factor(dat$Gender)
+dat$Percent = dat$Percent*100
+
+```
+
+Lets start by exploring the data with a with a basic grouped bar plots.
+
+```{r}
+dat |> 
+  mutate(nat_gender = paste(Nat,Gender, sep="_")) |> 
+  ggplot( aes(reorder(Animal, Percent), Percent, fill=nat_gender))+
+  geom_bar(stat='identity', position='dodge')+
+  theme_minimal()
+```
+
+Ok. That looks accurate, but its hard to interpret anything other than a general patterns about the animals people think they can or cant beat in a fight. Lets try it a different way. There are too many possible comparisons to make.
+
+Lets seperate out by gender and compare the two countries.
+
+Faceted Paired bar plot - sorted by percent respondents
+
+```{r}
+#faceted bar plots
+ggplot(dat, aes(reorder(Animal, Percent), Percent, fill=Nat))+
+  geom_bar(stat='identity', position='dodge')+
+  coord_flip()+
+  facet_wrap(~Gender)+
+  theme_minimal()
+
+```
+
+slope chart
+
+```{r}
+  
+dat |> 
+  ggplot(aes(Gender, Percent, group=Animal))+
+  geom_point(aes(col=Animal), size=3)+
+  geom_line(aes(col=Animal))+
+  geom_text_repel(
+    data=dat %>% filter(Gender=="Male"), 
+    aes(label = Animal, col=Animal),
+    nudge_x = 0.02, hjust=0,
+    direction = "y", size=3)+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  facet_wrap(~Nat)
+
+dat |> 
+  ggplot(aes(Nat, Percent, group=Animal))+
+  geom_point(aes(col=Animal), size=3)+
+  geom_line(aes(col=Animal))+
+  geom_text_repel(
+    data=dat %>% filter(Nat=="British"), 
+    aes(label = Animal, col=Animal),
+    nudge_x = 0.02, hjust=0,
+    direction = "y", size=3)+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  facet_wrap(~Gender)
+
+ggsave("Animalvshuman_slope.svg", plot = slopechart)
+```
+
+slope chart - Americans only
+
+```{r}
+
+Americans <- dat |> 
+  filter(Nat=="American")  
+  
+plot1 <- Americans |> 
+  ggplot(aes(Gender, Percent, group=Animal))+
+  geom_point(aes(col=Animal), size=3)+
+  geom_line(aes(col=Animal))+
+  geom_text_repel(
+    data=Americans %>% filter(Gender=="Male"), 
+    aes(label = Animal, col=Animal),
+    nudge_x = 0.02, hjust=0,
+    direction = "y", size=3)+
+  theme_minimal()+
+  theme(legend.position = "none")
+
+plot1
+
+ggsave("Figures/Animalvshuman_slope.svg", plot = plot1)
+
+
+```
+
+Subset to just Americans
+
+Scatterplot men vs women for each animal
+
+Good for valence (above or below) for each animal, but maskes some differences, #especially on the lower end of the graph
+
+```{r}
+
+dat_wide <- dat |> 
+  filter(Nat == "American") |> 
+  pivot_wider(names_from=Gender, values_from= Percent)
+
+ggplot(dat_wide, aes(Female, Male))+
+  geom_point(aes(col=Animal), show.legend=F, size=4)+
+  theme_classic()+
+  geom_text_repel(aes(label=Animal),
+                  hjust = "left",
+                  nudge_x = 0.1,
+                  size = 3,
+                  col='darkgrey')+
+  geom_abline(intercept = 0, slope = 1, size = 0.5, linetype= "dashed") +
+  labs(title="Americans only")
+```
+
+```{r}
+
+```
+
+Dumbell plot - arranges based on MALE descending order
+
+Good for showing absolute differences between animals as well as differences between the genders for each animal
+
+Which you sort on will be identified as the viewer as the "reference" #note the slight differences in the stories that emerge/dissappear
+
+```{r}
+
+dat %>% 
+  arrange(desc(Gender),Percent) %>% 
+  mutate(Animal = factor(Animal, unique(Animal))) %>%
+  ggplot(aes(Animal, Percent, col=Gender))+
+  geom_line(aes(group=Animal), col='grey', size=3, alpha=.3)+
+  geom_point(size=4)+
+  coord_flip()+
+  theme_minimal()+
+  ylim(0,100)+
+  facet_wrap(~Nat)
+
+```
+
+Dumbell plot - arranged based on FEMALE descending order
+
+Just Americans, sort by female averages
+
+```{r}
+Americans %>% 
+  arrange(Gender,Percent) %>% 
+  mutate(Animal = factor(Animal, unique(Animal))) %>%
+  ggplot(aes(Animal, Percent, col=Gender))+
+  geom_line(aes(group=Animal), col='grey', size=3, alpha=.3)+
+  geom_point(size=4)+
+  coord_flip()+
+  theme_minimal()+
+  ylim(0,100)
+```
+
+```{r}
+#ggsave("my_plot.svg", plot = my_plot, width = 8, height = 6, units = "in")
+
+```
+
+```{r}
+
+library(ggtext) #allows you to use html code for text formatting
+
+# 
+Americans <- dat |> 
+  filter(Nat=="American") |>  
+  arrange(Gender,Percent) |>  
+  mutate(gender_color = case_when(
+           Gender == "Male" ~ "#11747B",
+           Gender == "Female" ~ "#713FA8",
+           TRUE ~ "grey"
+         )) |> 
+  mutate(Animal = factor(Animal, unique(Animal))) |> 
+  mutate(highlight_alpha = case_when(
+           Animal == "Rat" ~ 1,
+           Animal == "House cat" ~ 1,
+           Animal == "King Cobra" ~ 1,
+           Animal == "Lion"~1,
+           TRUE ~ 0.5
+           )) 
+
+Americans |> 
+  ggplot(aes(Animal, Percent, col=gender_color))+
+  geom_line(aes(group=Animal, 
+                alpha=highlight_alpha), 
+            col='lightgrey', size=3)+
+  geom_point(aes(alpha=highlight_alpha),size=4)+
+  coord_flip()+
+  theme_minimal()+
+  ylim(0,100)+
+  scale_color_identity()+
+  scale_alpha_identity()+
+  scale_y_continuous(labels = scales::percent_format(scale=1),limits = c(0, 100))+
+  geom_text_repel(
+    data=Americans %>% filter(Animal=="Rat"), 
+    aes(label = Gender, col=gender_color),
+    vjust=1, size=3)+
+  annotate("text", x = "Rat", y = 25, 
+           label = "A majority believe they \ncould beat a rat or house cat", 
+           hjust = 0, vjust=1, size = 3.5, color = "darkgrey")+
+  annotate("text", x = "King Cobra", y = 30, 
+           label = "Men are disproportionatly confident \nin their chances against king cobras",
+           hjust = 0, size = 3.5, color = "darkgrey")+
+  annotate("text", x = "Lion", y = 15, 
+           label = "Lions are the only animal for which \nwomen are more confident than men",
+           hjust = 0, size = 3.5, color = "darkgrey")+
+  labs(title="A majority of American <strong style='color:#11747B;'>men</strong> 
+  and <strong style='color:#713FA8;'>women</strong> believe they could <br>beat a rat or a house cat in a barehanded fight", 
+       y="Percent who responded 'Yes'",
+       x="")+
+  theme(panel.grid = element_blank(),
+        plot.title = element_markdown())
+  
+```
+
+```{r}
+
+head(dat)
+
+gender_gaps <- dat |> 
+  filter(Nat == "American") |> 
+  pivot_wider(names_from = Gender, values_from = Percent) |> 
+  mutate(Gender_Diff = Male - Female) |> 
+  mutate(Gender_Diff_Ratio = Gender_Diff/Female) |> 
+  select(Animal, Nat, Male, Female, Gender_Diff, Gender_Diff_Ratio)
+
+
+
+gender_gaps |> 
+  ggplot(aes(reorder(Animal,Gender_Diff_Ratio), Gender_Diff_Ratio))+
+  geom_point(aes(col=Gender_Diff>=0))+
+  coord_flip()+
+  theme_minimal()
+
+```

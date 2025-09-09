@@ -1,0 +1,61 @@
+﻿Animal,Nat,Gender,Percent
+Rat,British,Male,0.77
+House cat,British,Male,0.75
+Medium sized dog,British,Male,0.54
+Large dog,British,Male,0.2
+Kangaroo,British,Male,0.09
+Eagle,British,Male,0.28
+Grizzly bear,British,Male,0.03
+Wolf,British,Male,0.08
+Lion,British,Male,0.03
+Gorilla,British,Male,0.02
+Chimpanzee,British,Male,0.15
+King Cobra,British,Male,0.12
+Elephant,British,Male,0.03
+Crocodile,British,Male,0.04
+Goose,British,Male,0.58
+Rat,British,Female,0.57
+House cat,British,Female,0.58
+Medium sized dog,British,Female,0.23
+Large dog,British,Female,0.06
+Kangaroo,British,Female,0.02
+Eagle,British,Female,0.09
+Grizzly bear,British,Female,0.01
+Wolf,British,Female,0.01
+Lion,British,Female,0.01
+Gorilla,British,Female,0.01
+Chimpanzee,British,Female,0.04
+King Cobra,British,Female,0.02
+Elephant,British,Female,0.01
+Crocodile,British,Female,0.01
+Goose,British,Female,0.32
+Rat,American,Male,0.76
+House cat,American,Male,0.74
+Medium sized dog,American,Male,0.6
+Large dog,American,Male,0.31
+Kangaroo,American,Male,0.17
+Eagle,American,Male,0.38
+Grizzly bear,American,Male,0.07
+Wolf,American,Male,0.16
+Lion,American,Male,0.07
+Gorilla,American,Male,0.09
+Chimpanzee,American,Male,0.22
+King Cobra,American,Male,0.23
+Elephant,American,Male,0.09
+Crocodile,American,Male,0.1
+Goose,American,Male,0.71
+Rat,American,Female,0.68
+House cat,American,Female,0.64
+Medium sized dog,American,Female,0.39
+Large dog,American,Female,0.15
+Kangaroo,American,Female,0.11
+Eagle,American,Female,0.23
+Grizzly bear,American,Female,0.06
+Wolf,American,Female,0.09
+Lion,American,Female,0.08
+Gorilla,American,Female,0.08
+Chimpanzee,American,Female,0.12
+King Cobra,American,Female,0.08
+Elephant,American,Female,0.08
+Crocodile,American,Female,0.08
+Goose,American,Female,0.51
